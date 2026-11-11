@@ -5,6 +5,7 @@ import helpdesk.model.Lookup;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import java.awt.GridLayout;
 import java.sql.SQLException;
@@ -23,7 +24,9 @@ class ReferencePanel extends JPanel implements Refreshable {
     ReferencePanel() {
         super(new GridLayout(1, 5, 6, 6));
         for (DefaultTableModel model : List.of(departments, teams, categories, priorities, statuses)) {
-            add(new JScrollPane(Ui.table(model)));
+            JTable table = Ui.table(model);
+            table.getColumnModel().getColumn(0).setMaxWidth(40);
+            add(new JScrollPane(table));
         }
     }
 

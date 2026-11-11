@@ -3,18 +3,40 @@
 Class 4-310 | Group 3. Java + MySQL (JDBC). Has a Swing GUI and a console (CLI) version
 that share the same database code.
 
+## Requirements
+
+| Software | Version | Notes |
+|---|---|---|
+| Java JDK | 17 or newer | `java -version` and `javac -version` must work in a terminal |
+| MySQL Server | 8.0 | must be running on `localhost:3306` |
+| MySQL Connector/J (JDBC driver) | 8.4.0 | already included: `lib/mysql-connector-j-8.4.0.jar` |
+| MySQL Workbench (optional) | 8.0 or newer | to look at the tables and run the SQL files |
+
+### JDBC driver
+
+The program talks to MySQL through the MySQL Connector/J driver, which is already in `lib/`.
+It only has to be on the classpath when you compile and run (the commands below do this with `-cp`).
+
+- If the jar is missing, download **Connector/J 8.4.0, Platform Independent** from
+  https://dev.mysql.com/downloads/connector/j/ , unzip it, and copy `mysql-connector-j-8.4.0.jar` into `lib/`.
+- VS Code finds it through `.vscode/settings.json` (`"java.project.referencedLibraries": ["lib/**/*.jar"]`).
+- In another IDE (NetBeans, IntelliJ, Eclipse), add `lib/mysql-connector-j-8.4.0.jar` as a library of the project.
+- Classpath separator: `;` on Windows, `:` on macOS / Linux.
+
 ## How to run
 
-1. Create the database (only needed once, or to reset it):
+1. Create the database with tables, reference data and sample data. **This drops and recreates `it_helpdesk`.**
    ```bash
-   mysql -u root -p < sql/4-310G3W2.sql
+   mysql -u root -p < sql/database.sql
    ```
-2. Load the sample data so the reports have something to show (run right after step 1):
-   ```bash
-   mysql -u root -p < sql/4-310G3W4_sample_data.sql
+   Or open `sql/database.sql` in MySQL Workbench and click the lightning bolt (Execute).
+2. Put your MySQL user name and password in `db.properties` (it must be in the folder you run the program from):
+   ```properties
+   db.url=jdbc:mysql://localhost:3306/it_helpdesk
+   db.user=root
+   db.password=your-password
    ```
-3. Check the user name and password in `db.properties`.
-4. Compile and run:
+3. Compile and run:
    ```bash
    ./run.sh        # GUI version
    ./run.sh cli    # console version
@@ -47,7 +69,7 @@ instead of closing the program.
 | Requirement | Where in the menu |
 |---|---|
 | Java connects to MySQL | Shown on startup ("Connected to ...") |
-| Main menu | Tickets, Users, Assets, Reference data |
+| Main menu | Tickets, Users, Assets, Reference data, Reports, Exit |
 | VIEW | View all tickets, ticket details (with history and comments), users, assets, reference data |
 | INSERT | Submit ticket, add user, add asset, add comment |
 | UPDATE | Assign technician, change status, change priority, update user, update asset, deactivate user |
@@ -60,9 +82,10 @@ Business rules from Weeks 1–2 that the program follows:
 - Resolving a ticket sets `date_resolved`, closing sets `date_closed`, reopening clears both (BR14).
 - An asset that a ticket uses cannot be deleted (foreign key). Set it to Retired instead.
 
-Not done yet: login, feedback, attachments, search/filter, auto-close after 3 days.
+Not done yet: login, screens for feedback and attachments (the tables exist), search/filter,
+automatic closing after 3 days.
 
-## Week 4 queries
+## Queries
 
 GUI: **Reports** tab. Console: main menu → **5. Reports (queries)**; pick a number, or **A** to run all ten.
 The SQL lives in `src/helpdesk/dao/ReportDao.java`; the same SQL is in
@@ -95,9 +118,23 @@ src/helpdesk/
   dao/               all SQL lives here (TicketDao, UserDao, AssetDao, ReportDao, ...)
   cli/               console menus and keyboard input (ReportMenu = Week 4 queries)
   gui/               Swing screens (GuiMain starts it; one panel per tab)
-lib/                 MySQL JDBC driver
-sql/                 Week 2 database script, Week 4 sample data and queries
+lib/                 MySQL JDBC driver (Connector/J 8.4.0)
+sql/database.sql     FINAL database script: tables, constraints, reference and sample data
+sql/4-310G3W4_queries.sql   the 10 queries, for MySQL Workbench
+sql/4-310G3W2.sql, sql/4-310G3W4_sample_data.sql   earlier weekly scripts (kept for reference)
+db.properties        MySQL connection settings
+run.sh               compile and run (GUI, or console with "cli")
 ```
+
+## Troubleshooting
+
+| Message | Fix |
+|---|---|
+| `Cannot connect to the database: Access denied` | Wrong user or password in `db.properties` |
+| `Cannot connect ... Communications link failure` | MySQL is not running (start the MySQL80 service) |
+| `Unknown database 'it_helpdesk'` | Run `sql/database.sql` first |
+| `No suitable driver` / `ClassNotFoundException: com.mysql...` | The jar in `lib/` is missing or not on the classpath |
+| `db.properties not found, using default settings` | Run the program from the project folder |
 
 The `dao` and `model` packages do not print anything or read the keyboard, so the
 `gui` and `cli` packages both call the same DAOs.
