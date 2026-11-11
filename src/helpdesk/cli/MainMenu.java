@@ -13,6 +13,7 @@ public class MainMenu {
     private final TicketMenu ticketMenu = new TicketMenu(io);
     private final UserMenu userMenu = new UserMenu(io);
     private final AssetMenu assetMenu = new AssetMenu(io);
+    private final ReportMenu reportMenu = new ReportMenu(io);
     private final LookupDao lookupDao = new LookupDao();
 
     public void show() {
@@ -23,6 +24,7 @@ public class MainMenu {
             System.out.println("2. Users");
             System.out.println("3. Assets");
             System.out.println("4. Reference data");
+            System.out.println("5. Reports (queries)");
             System.out.println("0. Exit");
             String choice = io.readLine("Choose: ");
             switch (choice) {
@@ -30,6 +32,7 @@ public class MainMenu {
                 case "2" -> userMenu.show();
                 case "3" -> assetMenu.show();
                 case "4" -> showReferenceData();
+                case "5" -> reportMenu.show();
                 case "0" -> {
                     System.out.println("Goodbye.");
                     return;
