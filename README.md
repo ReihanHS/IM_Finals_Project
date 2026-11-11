@@ -1,6 +1,7 @@
-# IT Help Desk Ticketing System — Week 4 (Queries and Full System Integration)
+# IT Help Desk Ticketing System
 
-Class 4-310 | Group 3. Console (CLI) version. Connects Java to MySQL with JDBC.
+Class 4-310 | Group 3. Java + MySQL (JDBC). Has a Swing GUI and a console (CLI) version
+that share the same database code.
 
 ## How to run
 
@@ -15,11 +16,33 @@ Class 4-310 | Group 3. Console (CLI) version. Connects Java to MySQL with JDBC.
 3. Check the user name and password in `db.properties`.
 4. Compile and run:
    ```bash
-   ./run.sh
+   ./run.sh        # GUI version
+   ./run.sh cli    # console version
    ```
-   In VS Code you can also open `src/helpdesk/Main.java` and press Run.
+   On Windows (PowerShell), from the project folder:
+   ```powershell
+   javac --release 17 -d out -cp lib/mysql-connector-j-8.4.0.jar (Get-ChildItem -Recurse -Filter *.java src).FullName
+   java -cp "out;lib/mysql-connector-j-8.4.0.jar" helpdesk.gui.GuiMain   # GUI
+   java -cp "out;lib/mysql-connector-j-8.4.0.jar" helpdesk.Main          # console
+   ```
+   In VS Code, open the Run and Debug panel and pick **Run Help Desk (GUI)** or **Run Help Desk (console)**.
 
-## What works
+## GUI version
+
+One window with a tab for each part of the system. **File → Exit** (or closing the window) asks before quitting.
+
+| Tab | What you can do |
+|---|---|
+| Tickets | View all tickets; **New ticket**; **Assign technician**; **Change status**; **Change priority**; **View details / comments** (or double-click a row) shows the status history and lets you add or delete comments |
+| Users | View all users; **Add user**; **Edit user**; **Activate / deactivate** (users are never deleted) |
+| Assets | View all assets; **Add asset**; **Edit asset**; **Delete asset** |
+| Reports | Pick one of the 10 queries and click **Run** (or double-click it); shows the result table and the SQL |
+| Reference data | Departments, support teams, categories, priorities and ticket statuses |
+
+Forms check required fields and email format before saving, and database errors are shown in a message box
+instead of closing the program.
+
+## Console version
 
 | Requirement | Where in the menu |
 |---|---|
@@ -41,7 +64,7 @@ Not done yet: login, feedback, attachments, search/filter, auto-close after 3 da
 
 ## Week 4 queries
 
-Main menu → **5. Reports (queries)**. Pick a number, or **A** to run all ten.
+GUI: **Reports** tab. Console: main menu → **5. Reports (queries)**; pick a number, or **A** to run all ten.
 The SQL lives in `src/helpdesk/dao/ReportDao.java`; the same SQL is in
 `sql/4-310G3W4_queries.sql` for running in MySQL Workbench.
 
@@ -66,15 +89,15 @@ stopping the program.
 
 ```
 src/helpdesk/
-  Main.java          starts the app and tests the connection
+  Main.java          starts the console version and tests the connection
   db/Database.java   opens JDBC connections (reads db.properties)
   model/             data classes (Ticket, User, Asset, Comment, ...)
   dao/               all SQL lives here (TicketDao, UserDao, AssetDao, ReportDao, ...)
   cli/               console menus and keyboard input (ReportMenu = Week 4 queries)
+  gui/               Swing screens (GuiMain starts it; one panel per tab)
 lib/                 MySQL JDBC driver
 sql/                 Week 2 database script, Week 4 sample data and queries
 ```
 
-The `dao` and `model` packages do not print anything or read the keyboard.
-When we build the Swing version, we only add a new `gui` package that calls the same DAOs;
-the `cli` package can stay as it is.
+The `dao` and `model` packages do not print anything or read the keyboard, so the
+`gui` and `cli` packages both call the same DAOs.
